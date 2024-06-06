@@ -1,0 +1,514 @@
+openapi: 3.0.0
+info:
+  title: Formance Reconciliation API
+  version: 0.0.0
+tags: []
+paths:
+  /api/reconciliation/_info:
+    get:
+      operationId: _info
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verison:
+                    type: string
+                required:
+                  - verison
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      security:
+        - FormanceOAuth:
+            - reconciliation:read
+      x-speakeasy-name-override: info
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+  /api/reconciliation/policies:
+    post:
+      operationId: PoliciesV1_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Policy'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                ledgerName:
+                  type: string
+                ledgerQuery:
+                  type: object
+                  additionalProperties: {}
+                paymentsPoolID:
+                  type: string
+              required:
+                - name
+                - ledgerName
+                - ledgerQuery
+                - paymentsPoolID
+      security:
+        - FormanceOAuth:
+            - reconciliation:read
+      x-speakeasy-group: PoliciesV1
+      x-speakeasy-name-override: create
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+    get:
+      operationId: PoliciesV1_list
+      parameters:
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            default: 15
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - cursor
+                properties:
+                  cursor:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Policy'
+                    required:
+                      - data
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      security:
+        - FormanceOAuth:
+            - reconciliation:read
+      x-speakeasy-pagination:
+        type: cursor
+        inputs:
+          - name: cursor
+            in: parameters
+            type: cursor
+        outputs:
+          nextCursor: $.cursor.next
+          results: $.cursor.data
+      x-speakeasy-group: PoliciesV1
+      x-speakeasy-name-override: list
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+  /api/reconciliation/policies/{policyID}:
+    delete:
+      operationId: PoliciesV1_delete
+      parameters:
+        - name: policyID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      security:
+        - FormanceOAuth:
+            - reconciliation:write
+      x-speakeasy-group: PoliciesV1
+      x-speakeasy-name-override: delete
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+    get:
+      operationId: PoliciesV1_get
+      parameters:
+        - name: policyID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Policy'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      security:
+        - FormanceOAuth:
+            - reconciliation:read
+      x-speakeasy-group: PoliciesV1
+      x-speakeasy-name-override: get
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+  /api/reconciliation/policies/{policyID}/reconciliation:
+    post:
+      operationId: _reconcile
+      parameters:
+        - name: policyID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Reconciliation'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reconciledAtLedger:
+                  type: string
+                  format: date-time
+                reconciliedAtPayments:
+                  type: string
+                  format: date-time
+              required:
+                - reconciledAtLedger
+                - reconciliedAtPayments
+      x-speakeasy-name-override: reconcile
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+  /api/reconciliation/reconciliations:
+    get:
+      operationId: ReconciliationsV1_list
+      parameters:
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 100
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - cursor
+                properties:
+                  cursor:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Reconciliation'
+                    required:
+                      - data
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      x-speakeasy-pagination:
+        type: cursor
+        inputs:
+          - name: cursor
+            in: parameters
+            type: cursor
+        outputs:
+          nextCursor: $.cursor.next
+          results: $.cursor.data
+      x-speakeasy-group: ReconciliationsV1
+      x-speakeasy-name-override: list
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+  /api/reconciliation/reconciliations/{reconciliationId}:
+    get:
+      operationId: ReconciliationsV1_get
+      parameters:
+        - name: reconciliationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Reconciliation'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationError'
+      x-speakeasy-group: ReconciliationsV1
+      x-speakeasy-name-override: get
+      x-speakeasy-errors:
+        statusCodes:
+          - default
+      x-speakeasy-retries:
+        strategy: backoff
+        backoff:
+          initialInterval: 500
+          maxInterval: 60000
+          maxElapsedTime: 3600000
+          exponent: 1.5
+        statusCodes:
+          - 5XX
+        retryConnectionErrors: true
+components:
+  schemas:
+    Policy:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - ledgerName
+        - ledgerQuery
+        - paymentsPoolID
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        ledgerName:
+          type: string
+        ledgerQuery:
+          type: object
+          additionalProperties: {}
+        paymentsPoolID:
+          type: string
+    Reconciliation:
+      type: object
+      required:
+        - id
+        - policyID
+        - createdAt
+        - reconciliedAtLedger
+        - reconciliedAtPayments
+        - status
+        - paymentsBalances
+        - ledgerBalances
+        - driftBalances
+      properties:
+        id:
+          type: string
+        policyID:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        reconciliedAtLedger:
+          type: string
+          format: date-time
+        reconciliedAtPayments:
+          type: string
+          format: date-time
+        status:
+          type: string
+        paymentsBalances:
+          type: object
+          additionalProperties:
+            type: integer
+        ledgerBalances:
+          type: object
+          additionalProperties:
+            type: integer
+        driftBalances:
+          type: object
+          additionalProperties:
+            type: integer
+        error:
+          type: string
+    ReconciliationError:
+      type: object
+      required:
+        - errorCode
+        - errorMessage
+      properties:
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        details:
+          type: string
+  securitySchemes:
+    FormanceOAuth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /api/auth/oauth/token
+          scopes:
+            reconciliation:read: ''
+            reconciliation:write: ''
+servers:
+  - url: http://localhost
+    description: Default localhost endpoint
+    variables: {}
